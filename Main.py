@@ -1,3 +1,6 @@
+import itertools
+
+
 # Enter sudoku information here
 row_0 = ["?", "?", "?", "?", "?", "?", "?", 3, "?"]
 row_1 = ["?", 6, 2, "?", "?", 4, "?", "?", 8]
