@@ -116,3 +116,78 @@ def unique_grid_possibility(matrix):
                         row[column_index] = possibility
                         return True
     return False
+
+
+# Functions designed to obtain all possibilities of all unsolved cells of each row/column in a given grid
+def retrieve_grid_row_possibilities(grid_row_index, grid_column_index, matrix):
+    grid_row_start = 3 * grid_row_index
+    grid_column_start = 3 * grid_column_index
+    grid_row_possibilities = [[], [], []]
+    for grid_row in range(3):
+        for grid_column in range(3):
+            if isinstance(matrix[grid_row_start + grid_row][grid_column_start + grid_column], list):
+                grid_row_possibilities[grid_row] += matrix[grid_row_start + grid_row][grid_column_start + grid_column]
+    for row_possibilities in range(3):
+        grid_row_possibilities[row_possibilities] = list(set(grid_row_possibilities[row_possibilities]))
+    return grid_row_possibilities
+
+
+def retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix):
+    grid_row_start = 3 * grid_row_index
+    grid_column_start = 3 * grid_column_index
+    grid_col_possibilities = [[], [], []]
+    for grid_row in range(3):
+        for grid_col in range(3):
+            if isinstance(matrix[grid_row_start + grid_row][grid_column_start + grid_col], list):
+                grid_col_possibilities[grid_col] += matrix[grid_row_start + grid_row][grid_column_start + grid_col]
+    for row_possibilities in range(3):
+        grid_col_possibilities[row_possibilities] = list(set(grid_col_possibilities[row_possibilities]))
+    return grid_col_possibilities
+
+
+# Using the retrieve functions to find grid row/column secluded possibilities and eliminate them from the other grids
+def eliminate_grid_secluded_row_possibilities(grid_row_index, grid_column_index, matrix):
+    grid_row_possibilities = retrieve_grid_row_possibilities(grid_row_index, grid_column_index, matrix)
+    for row_index, grid_row in enumerate(grid_row_possibilities):
+        for possibility in grid_row:
+            counter = 0
+            for row_check in range(3):
+                if possibility in grid_row_possibilities[row_check]:
+                    counter += 1
+            if counter == 1:
+                row_index = 3 * grid_row_index + row_index
+                grid_column_start = 3 * grid_column_index
+                for non_grid_cells in set(range(9)) - set(range(grid_column_start, grid_column_start + 3)):
+                    if isinstance(matrix[row_index][non_grid_cells], list):
+                        if possibility in matrix[row_index][non_grid_cells]:
+                            matrix[row_index][non_grid_cells].remove(possibility)
+
+
+def eliminate_grid_secluded_column_possibilities(grid_row_index, grid_column_index, matrix):
+    grid_column_possibilities = retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix)
+    for column_index, grid_col in enumerate(grid_column_possibilities):
+        for possibility in grid_col:
+            counter = 0
+            for column_check in range(3):
+                if possibility in grid_column_possibilities[column_check]:
+                    counter += 1
+            if counter == 1:
+                grid_row_start = 3 * grid_row_index
+                column_index = 3 * grid_column_index + column_index
+                for non_grid_cells in set(range(9)) - set(range(grid_row_start, grid_row_start + 3)):
+                    if isinstance(matrix[non_grid_cells][column_index], list):
+                        if possibility in matrix[non_grid_cells][column_index]:
+                            matrix[non_grid_cells][column_index].remove(possibility)
+
+
+# Extending the two algorithms to each grid
+def eliminate_secluded_row_possibilities(matrix):
+    for grid_row in range(3):
+        for grid_column in range(3):
+            eliminate_grid_secluded_row_possibilities(grid_row, grid_column, matrix)
+
+
+def eliminate_secluded_column_possibilities(matrix):
+    for grid_row in range(3):
+        for grid_column in range(3):
+            eliminate_grid_secluded_column_possibilities(grid_row, grid_column, matrix)
