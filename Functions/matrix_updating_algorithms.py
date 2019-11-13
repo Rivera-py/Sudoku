@@ -145,7 +145,7 @@ def retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix):
     return grid_col_possibilities
 
 
-# Using the retrieve functions to find grid row/column secluded possibilities and eliminate them from the other grids
+# Using the retrieve functions to find grid row/column-secluded possibilities and eliminate them from the other grids
 def eliminate_grid_secluded_row_possibilities(grid_row_index, grid_column_index, matrix):
     grid_row_possibilities = retrieve_grid_row_possibilities(grid_row_index, grid_column_index, matrix)
     for row_index, grid_row in enumerate(grid_row_possibilities):
@@ -155,12 +155,12 @@ def eliminate_grid_secluded_row_possibilities(grid_row_index, grid_column_index,
                 if possibility in grid_row_possibilities[row_check]:
                     counter += 1
             if counter == 1:
-                row_index = 3 * grid_row_index + row_index
+                amend_row_index = 3 * grid_row_index + row_index
                 grid_column_start = 3 * grid_column_index
                 for non_grid_cells in set(range(9)) - set(range(grid_column_start, grid_column_start + 3)):
-                    if isinstance(matrix[row_index][non_grid_cells], list):
-                        if possibility in matrix[row_index][non_grid_cells]:
-                            matrix[row_index][non_grid_cells].remove(possibility)
+                    if isinstance(matrix[amend_row_index][non_grid_cells], list):
+                        if possibility in matrix[amend_row_index][non_grid_cells]:
+                            matrix[amend_row_index][non_grid_cells].remove(possibility)
 
 
 def eliminate_grid_secluded_column_possibilities(grid_row_index, grid_column_index, matrix):
@@ -173,21 +173,111 @@ def eliminate_grid_secluded_column_possibilities(grid_row_index, grid_column_ind
                     counter += 1
             if counter == 1:
                 grid_row_start = 3 * grid_row_index
-                column_index = 3 * grid_column_index + column_index
+                amend_column_index = 3 * grid_column_index + column_index
                 for non_grid_cells in set(range(9)) - set(range(grid_row_start, grid_row_start + 3)):
-                    if isinstance(matrix[non_grid_cells][column_index], list):
-                        if possibility in matrix[non_grid_cells][column_index]:
-                            matrix[non_grid_cells][column_index].remove(possibility)
+                    if isinstance(matrix[non_grid_cells][amend_column_index], list):
+                        if possibility in matrix[non_grid_cells][amend_column_index]:
+                            matrix[non_grid_cells][amend_column_index].remove(possibility)
 
 
 # Extending the two algorithms to each grid
-def eliminate_secluded_row_possibilities(matrix):
+def eliminate_all_grid_secluded_row_possibilities(matrix):
     for grid_row in range(3):
         for grid_column in range(3):
             eliminate_grid_secluded_row_possibilities(grid_row, grid_column, matrix)
 
 
-def eliminate_secluded_column_possibilities(matrix):
+def eliminate_all_grid_secluded_column_possibilities(matrix):
     for grid_row in range(3):
         for grid_column in range(3):
             eliminate_grid_secluded_column_possibilities(grid_row, grid_column, matrix)
+
+
+# Checks for n cells containing the same n possibilities and removes all those possibilities on the same row/column/grid
+def locked_row_possibilities(row):
+    unsolved_cells = []
+    for column_index, cell in enumerate(row):
+        if isinstance(cell, list):
+            unsolved_cells += [[column_index, cell]]
+    for group_size in range(2, 5):
+        unsolved_cells_correct_size = []
+        for unsolved_cell_check in unsolved_cells:
+            if len(unsolved_cell_check[1]) == group_size:
+                unsolved_cell_check[1].sort()
+                unsolved_cells_correct_size += [unsolved_cell_check]
+        for correct_cell in unsolved_cells_correct_size:
+            column_indices = []
+            for comparing_cells in unsolved_cells_correct_size:
+                if comparing_cells[1] == correct_cell[1]:
+                    column_indices += [comparing_cells[0]]
+            if len(column_indices) == group_size:
+                for removing_index in set(range(9)) - set(column_indices):
+                    if isinstance(row[removing_index], list):
+                        row[removing_index] = list(set(row[removing_index]) - set(correct_cell[1]))
+
+
+def locked_column_possibilities(column, matrix):
+    unsolved_cells = []
+    for row_index, row in enumerate(matrix):
+        if isinstance(row[column], list):
+            unsolved_cells += [[row_index, row[column]]]
+    for group_size in range(2, 5):
+        unsolved_cells_correct_size = []
+        for unsolved_cell_check in unsolved_cells:
+            if len(unsolved_cell_check[1]) == group_size:
+                unsolved_cell_check[1].sort()
+                unsolved_cells_correct_size += [unsolved_cell_check]
+        for correct_cell in unsolved_cells_correct_size:
+            row_indices = []
+            for comparing_cells in unsolved_cells_correct_size:
+                if comparing_cells[1] == correct_cell[1]:
+                    row_indices += [comparing_cells[0]]
+            if len(row_indices) == group_size:
+                for removingindex in set(range(9)) - set(row_indices):
+                    if isinstance(matrix[removingindex][column], list):
+                        matrix[removingindex][column] = list(set(matrix[removingindex][column]) - set(correct_cell[1]))
+
+
+def locked_grid_possibilities(grid_row_index, grid_column_index, matrix):
+    unsolved_cells = []
+    grid_row_start = 3 * grid_row_index
+    grid_column_start = 3 * grid_column_index
+    for grid_row in range(grid_row_start, grid_row_start + 3):
+        for grid_column in range(grid_column_start, grid_column_start + 3):
+            if isinstance(matrix[grid_row][grid_column], list):
+                unsolved_cells += [[grid_row, grid_column, matrix[grid_row][grid_column]]]
+    for group_size in range(2, 5):
+        unsolved_cells_correct_size = []
+        for unsolved_cell_check in unsolved_cells:
+            if len(unsolved_cell_check[2]) == group_size:
+                unsolved_cells_correct_size += [unsolved_cell_check]
+        for correct_cell in unsolved_cells_correct_size:
+            cell_indices = []
+            for comparing_cell in unsolved_cells_correct_size:
+                if comparing_cell[2] == correct_cell[2]:
+                    cell_indices += [[comparing_cell[0], comparing_cell[1]]]
+            if len(cell_indices) == group_size:
+                for rem_row in range(grid_row_start, grid_row_start + 3):
+                    for rem_col in range(grid_column_start, grid_column_start + 3):
+                        if not([rem_row, rem_col] in cell_indices):
+                            if isinstance(matrix[rem_row][rem_col], list):
+                                rem_vals = set(correct_cell[2])
+                                matrix[rem_row][rem_col] = list(set(matrix[rem_row][rem_col]) - rem_vals)
+
+
+# Applies each of the three "locked" methods to each respective row/column/grid
+def all_locked_row_possibilities(matrix):
+    for row in matrix:
+        locked_row_possibilities(row)
+
+
+def all_locked_col_possibilities(matrix):
+    for column_index in range(9):
+        locked_column_possibilities(column_index, matrix)
+
+
+def all_locked_grid_possibilitites(matrix):
+    for grid_row_index in range(3):
+        for grid_col_index in range(3):
+            locked_grid_possibilities(grid_row_index, grid_col_index, matrix)
+
