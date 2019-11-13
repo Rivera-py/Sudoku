@@ -281,3 +281,54 @@ def all_locked_grid_possibilitites(matrix):
         for grid_col_index in range(3):
             locked_grid_possibilities(grid_row_index, grid_col_index, matrix)
 
+
+# If there is a grid row/column possibility which is not in adjacent cells then it should be secluded to that line
+def reverse_grid_seclude_row_possibilities(grid_row_index, grid_column_index, matrix):
+    grid_row_start = 3 * grid_row_index
+    grid_column_start = 3 * grid_column_index
+    grid_row_possibilities = retrieve_grid_row_possibilities(grid_row_index, grid_column_index, matrix)
+    for row_index, row_possibilities in enumerate(grid_row_possibilities):
+        for row_possibility in row_possibilities:
+            counter = 0
+            for non_grid_column in set(range(9)) - set(range(grid_column_start, grid_column_start + 3)):
+                if isinstance(matrix[grid_row_start + row_index][non_grid_column], list):
+                    if row_possibility in matrix[grid_row_start + row_index][non_grid_column]:
+                        counter += 1
+            if counter == 0:
+                for not_current_row in set(range(grid_row_start, grid_row_start + 3)) - {grid_row_start + row_index}:
+                    for column_index in range(grid_column_start, grid_column_start + 3):
+                        if isinstance(matrix[not_current_row][column_index], list):
+                            if row_possibility in matrix[not_current_row][column_index]:
+                                matrix[not_current_row][column_index].remove(row_possibility)
+
+
+def reverse_grid_seclude_column_possibilities(grid_row_index, grid_column_index, matrix):
+    grid_row_start = 3 * grid_row_index
+    grid_col_start = 3 * grid_column_index
+    grid_row_possibilities = retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix)
+    for col_index, column_possibilities in enumerate(grid_row_possibilities):
+        for column_possibility in column_possibilities:
+            counter = 0
+            for non_grid_row in set(range(9)) - set(range(grid_row_start, grid_row_start + 3)):
+                if isinstance(matrix[non_grid_row][grid_col_start + col_index], list):
+                    if column_possibility in matrix[non_grid_row][grid_col_start + col_index]:
+                        counter += 1
+            if counter == 0:
+                for not_current_column in set(range(grid_col_start, grid_col_start + 3)) - {grid_col_start + col_index}:
+                    for row_index in range(grid_row_start, grid_row_start + 3):
+                        if isinstance(matrix[row_index][not_current_column], list):
+                            if column_possibility in matrix[row_index][not_current_column]:
+                                matrix[row_index][not_current_column].remove(column_possibility)
+                                print("Removing", column_possibility, "from", row_index, not_current_column)
+
+
+def reverse_all_grid_seclude_row_possibilities(matrix):
+    for grid_row_index in range(3):
+        for grid_column_index in range(3):
+            reverse_grid_seclude_row_possibilities(grid_row_index, grid_column_index, matrix)
+
+
+def reverse_all_grid_seclude_column_possibilities(matrix):
+    for grid_row_index in range(3):
+        for grid_column_index in range(3):
+            reverse_grid_seclude_column_possibilities(grid_row_index, grid_column_index, matrix)
