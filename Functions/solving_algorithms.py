@@ -9,7 +9,7 @@ def basic_sudoku_solve(matrix):
     matrix_updating_algorithms.scan_and_solve(matrix)
     while copy_matrix != matrix:
         copy_matrix = copy.deepcopy(matrix)
-        matrix_updating_algorithms.one_possibility(matrix)
+        matrix_updating_algorithms.lone_singles(matrix)
         matrix_updating_algorithms.scan_and_solve(matrix)
 
 
@@ -18,11 +18,11 @@ def simple_sudoku_solve(matrix):
     run = True
     while run:
         basic_sudoku_solve(matrix)
-        if matrix_updating_algorithms.unique_row_possibility(matrix):
+        if matrix_updating_algorithms.hidden_singles_rows(matrix):
             continue
-        if matrix_updating_algorithms.unique_column_possibility(matrix):
+        if matrix_updating_algorithms.hidden_singles_columns(matrix):
             continue
-        if matrix_updating_algorithms.unique_grid_possibility(matrix):
+        if matrix_updating_algorithms.hidden_singles_grids(matrix):
             continue
         run = False
 
@@ -32,23 +32,23 @@ def intermediate_sudoku_solve(matrix):
     copy_matrix = []
     while copy_matrix != matrix:
         copy_matrix = copy.deepcopy(matrix)
-        matrix_updating_algorithms.eliminate_all_grid_secluded_row_possibilities(matrix)
+        matrix_updating_algorithms.naked_subset_all_rows(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.eliminate_all_grid_secluded_column_possibilities(matrix)
+        matrix_updating_algorithms.naked_subset_all_columns(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.all_locked_row_possibilities(matrix)
+        matrix_updating_algorithms.naked_subset_all_grids(matrix)
+        matrix_updating_algorithms.omission_all_rows(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.all_locked_col_possibilities(matrix)
+        matrix_updating_algorithms.omission_all_columns(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.all_locked_grid_possibilitites(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.reverse_all_grid_seclude_row_possibilities(matrix)
+        matrix_updating_algorithms.reverse_omission_all_rows(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.reverse_all_grid_seclude_column_possibilities(matrix)
+        matrix_updating_algorithms.reverse_omission_all_columns(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.all_hidden_row_subset(matrix)
+        matrix_updating_algorithms.hidden_subset_all_rows(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.all_hidden_column_subset(matrix)
+        matrix_updating_algorithms.hidden_subset_all_columns(matrix)
         simple_sudoku_solve(matrix)
-        matrix_updating_algorithms.all_hidden_grid_subset(matrix)
+        matrix_updating_algorithms.hidden_subset_all_grids(matrix)
         simple_sudoku_solve(matrix)
