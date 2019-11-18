@@ -56,7 +56,7 @@ def scan_and_solve(matrix):
 
 
 # If a cell has only one possibility, it must be that number
-def one_possibility(matrix):
+def lone_singles(matrix):
     for row in matrix:
         for column_index, elt in enumerate(row):
             if isinstance(elt, list):
@@ -64,8 +64,7 @@ def one_possibility(matrix):
                     row[column_index] = row[column_index][0]
 
 
-def unique_row_possibility(matrix):
-    cell_solution_possible = False
+def hidden_singles_rows(matrix):
     for row in matrix:
         for column_index, cell in enumerate(row):
             if isinstance(cell, list):
@@ -77,13 +76,11 @@ def unique_row_possibility(matrix):
                                 counter += 1
                     if counter == 1:
                         row[column_index] = possibility
-                        cell_solution_possible = True
-                        break
-    return cell_solution_possible
+                        return True
+    return False
 
 
-def unique_column_possibility(matrix):
-    cell_solution_possible = False
+def hidden_singles_columns(matrix):
     for row_index, row in enumerate(matrix):
         for column_index, cell in enumerate(row):
             if isinstance(cell, list):
@@ -95,12 +92,11 @@ def unique_column_possibility(matrix):
                                 counter += 1
                     if counter == 1:
                         row[column_index] = possibility
-                        cell_solution_possible = True
-                        break
-    return cell_solution_possible
+                        return True
+    return False
 
 
-def unique_grid_possibility(matrix):
+def hidden_singles_grids(matrix):
     for row_index, row in enumerate(matrix):
         for column_index, cell in enumerate(row):
             if isinstance(cell, list):
@@ -111,12 +107,92 @@ def unique_grid_possibility(matrix):
                     for grid_row in range(grid_row_start, grid_row_start + 3):
                         for grid_column in range(grid_column_start, grid_column_start + 3):
                             if isinstance(matrix[grid_row][grid_column], list):
-                                if (grid_row, grid_column) != (row_index, column_index):
+                                if possibility in matrix[grid_row][grid_column]:
                                     counter += 1
                     if counter == 1:
                         row[column_index] = possibility
                         return True
     return False
+
+
+
+
+
+# If n possibilities are relegated to n cells in a row/column/grid, then those possibilities are only in those cells
+def naked_subset_row(row):
+    unsolved_cells = []
+    for column_index, cell in enumerate(row):
+        if isinstance(cell, list):
+            unsolved_cells += [[column_index, cell]]
+    for group_size in range(2, 5):
+        for cell_subset in itertools.combinations(unsolved_cells, group_size):
+            collective_possibilities = []
+            column_indices = []
+            for selected_cell in cell_subset:
+                collective_possibilities += selected_cell[1]
+                column_indices += [selected_cell[0]]
+            if len(set(collective_possibilities)) == group_size:
+                for non_subset_cell in unsolved_cells:
+                    if not non_subset_cell[0] in column_indices:
+                        row[non_subset_cell[0]] = list(set(row[non_subset_cell[0]]) - set(collective_possibilities))
+
+
+def naked_subset_column(column, matrix):
+    unsolved_cells = []
+    for row_index, row in enumerate(matrix):
+        if isinstance(row[column], list):
+            unsolved_cells += [[row_index, row[column]]]
+    for group_size in range(2, 5):
+        for cell_subset in itertools.combinations(unsolved_cells, group_size):
+            collective_possibilities = []
+            row_indices = []
+            for selected_cell in cell_subset:
+                collective_possibilities += selected_cell[1]
+                row_indices += [selected_cell[0]]
+            if len(set(collective_possibilities)) == group_size:
+                for non_subset_cell in unsolved_cells:
+                    if not non_subset_cell[0] in row_indices:
+                        replacing_set = list(set(matrix[non_subset_cell[0]][column]) - set(collective_possibilities))
+                        matrix[non_subset_cell[0]][column] = replacing_set
+
+
+def naked_subset_grid(grid_row_index, grid_column_index, matrix):
+    unsolved_cells = []
+    grid_row_start = 3 * grid_row_index
+    grid_column_start = 3 * grid_column_index
+    for grid_row in range(grid_row_start, grid_row_start + 3):
+        for grid_column in range(grid_column_start, grid_column_start + 3):
+            if isinstance(matrix[grid_row][grid_column], list):
+                unsolved_cells += [[(grid_row, grid_column), matrix[grid_row][grid_column]]]
+    for group_size in range(2, 5):
+        for cell_subset in itertools.combinations(unsolved_cells, group_size):
+            collective_possibilities = []
+            grid_indices = []
+            for selected_cell in cell_subset:
+                collective_possibilities += selected_cell[1]
+                grid_indices += [selected_cell[0]]
+            if len(set(collective_possibilities)) == group_size:
+                for non_subset_cell in unsolved_cells:
+                    if not non_subset_cell[0] in grid_indices:
+                        indices = non_subset_cell[0]
+                        replacing_set = list(set(matrix[indices[0]][indices[1]]) - set(collective_possibilities))
+                        matrix[indices[0]][indices[1]] = replacing_set
+
+
+def naked_subset_all_rows(matrix):
+    for row in matrix:
+        naked_subset_row(row)
+
+
+def naked_subset_all_columns(matrix):
+    for column_index in range(9):
+        naked_subset_column(column_index, matrix)
+
+
+def naked_subset_all_grids(matrix):
+    for grid_row_index in range(3):
+        for grid_column_index in range(3):
+            naked_subset_grid(grid_row_index, grid_column_index, matrix)
 
 
 # Functions designed to obtain all possibilities of all unsolved cells of each row/column in a given grid
@@ -147,7 +223,7 @@ def retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix):
 
 
 # Using the retrieve functions to find grid row/column-secluded possibilities and eliminate them from the other grids
-def eliminate_grid_secluded_row_possibilities(grid_row_index, grid_column_index, matrix):
+def omission_row(grid_row_index, grid_column_index, matrix):
     grid_row_possibilities = retrieve_grid_row_possibilities(grid_row_index, grid_column_index, matrix)
     for row_index, grid_row in enumerate(grid_row_possibilities):
         for possibility in grid_row:
@@ -164,7 +240,7 @@ def eliminate_grid_secluded_row_possibilities(grid_row_index, grid_column_index,
                             matrix[amend_row_index][non_grid_cells].remove(possibility)
 
 
-def eliminate_grid_secluded_column_possibilities(grid_row_index, grid_column_index, matrix):
+def omission_column(grid_row_index, grid_column_index, matrix):
     grid_column_possibilities = retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix)
     for column_index, grid_col in enumerate(grid_column_possibilities):
         for possibility in grid_col:
@@ -182,109 +258,20 @@ def eliminate_grid_secluded_column_possibilities(grid_row_index, grid_column_ind
 
 
 # Extending the two algorithms to each grid
-def eliminate_all_grid_secluded_row_possibilities(matrix):
+def omission_all_rows(matrix):
     for grid_row in range(3):
         for grid_column in range(3):
-            eliminate_grid_secluded_row_possibilities(grid_row, grid_column, matrix)
+            omission_row(grid_row, grid_column, matrix)
 
 
-def eliminate_all_grid_secluded_column_possibilities(matrix):
+def omission_all_columns(matrix):
     for grid_row in range(3):
         for grid_column in range(3):
-            eliminate_grid_secluded_column_possibilities(grid_row, grid_column, matrix)
-
-
-# Checks for n cells containing the same n possibilities and removes all those possibilities on the same row/column/grid
-def locked_row_possibilities(row):
-    unsolved_cells = []
-    for column_index, cell in enumerate(row):
-        if isinstance(cell, list):
-            unsolved_cells += [[column_index, cell]]
-    for group_size in range(2, 5):
-        unsolved_cells_correct_size = []
-        for unsolved_cell_check in unsolved_cells:
-            if len(unsolved_cell_check[1]) == group_size:
-                unsolved_cell_check[1].sort()
-                unsolved_cells_correct_size += [unsolved_cell_check]
-        for correct_cell in unsolved_cells_correct_size:
-            column_indices = []
-            for comparing_cells in unsolved_cells_correct_size:
-                if comparing_cells[1] == correct_cell[1]:
-                    column_indices += [comparing_cells[0]]
-            if len(column_indices) == group_size:
-                for removing_index in set(range(9)) - set(column_indices):
-                    if isinstance(row[removing_index], list):
-                        row[removing_index] = list(set(row[removing_index]) - set(correct_cell[1]))
-
-
-def locked_column_possibilities(column, matrix):
-    unsolved_cells = []
-    for row_index, row in enumerate(matrix):
-        if isinstance(row[column], list):
-            unsolved_cells += [[row_index, row[column]]]
-    for group_size in range(2, 5):
-        unsolved_cells_correct_size = []
-        for unsolved_cell_check in unsolved_cells:
-            if len(unsolved_cell_check[1]) == group_size:
-                unsolved_cell_check[1].sort()
-                unsolved_cells_correct_size += [unsolved_cell_check]
-        for correct_cell in unsolved_cells_correct_size:
-            row_indices = []
-            for comparing_cells in unsolved_cells_correct_size:
-                if comparing_cells[1] == correct_cell[1]:
-                    row_indices += [comparing_cells[0]]
-            if len(row_indices) == group_size:
-                for removingindex in set(range(9)) - set(row_indices):
-                    if isinstance(matrix[removingindex][column], list):
-                        matrix[removingindex][column] = list(set(matrix[removingindex][column]) - set(correct_cell[1]))
-
-
-def locked_grid_possibilities(grid_row_index, grid_column_index, matrix):
-    unsolved_cells = []
-    grid_row_start = 3 * grid_row_index
-    grid_column_start = 3 * grid_column_index
-    for grid_row in range(grid_row_start, grid_row_start + 3):
-        for grid_column in range(grid_column_start, grid_column_start + 3):
-            if isinstance(matrix[grid_row][grid_column], list):
-                unsolved_cells += [[grid_row, grid_column, matrix[grid_row][grid_column]]]
-    for group_size in range(2, 5):
-        unsolved_cells_correct_size = []
-        for unsolved_cell_check in unsolved_cells:
-            if len(unsolved_cell_check[2]) == group_size:
-                unsolved_cells_correct_size += [unsolved_cell_check]
-        for correct_cell in unsolved_cells_correct_size:
-            cell_indices = []
-            for comparing_cell in unsolved_cells_correct_size:
-                if comparing_cell[2] == correct_cell[2]:
-                    cell_indices += [[comparing_cell[0], comparing_cell[1]]]
-            if len(cell_indices) == group_size:
-                for rem_row in range(grid_row_start, grid_row_start + 3):
-                    for rem_col in range(grid_column_start, grid_column_start + 3):
-                        if not([rem_row, rem_col] in cell_indices):
-                            if isinstance(matrix[rem_row][rem_col], list):
-                                rem_vals = set(correct_cell[2])
-                                matrix[rem_row][rem_col] = list(set(matrix[rem_row][rem_col]) - rem_vals)
-
-
-# Applies each of the three "locked" methods to each respective row/column/grid
-def all_locked_row_possibilities(matrix):
-    for row in matrix:
-        locked_row_possibilities(row)
-
-
-def all_locked_col_possibilities(matrix):
-    for column_index in range(9):
-        locked_column_possibilities(column_index, matrix)
-
-
-def all_locked_grid_possibilitites(matrix):
-    for grid_row_index in range(3):
-        for grid_col_index in range(3):
-            locked_grid_possibilities(grid_row_index, grid_col_index, matrix)
+            omission_column(grid_row, grid_column, matrix)
 
 
 # If there is a grid row/column possibility which is not in adjacent cells then it should be secluded to that line
-def reverse_grid_seclude_row_possibilities(grid_row_index, grid_column_index, matrix):
+def reverse_omission_row(grid_row_index, grid_column_index, matrix):
     grid_row_start = 3 * grid_row_index
     grid_column_start = 3 * grid_column_index
     grid_row_possibilities = retrieve_grid_row_possibilities(grid_row_index, grid_column_index, matrix)
@@ -303,7 +290,7 @@ def reverse_grid_seclude_row_possibilities(grid_row_index, grid_column_index, ma
                                 matrix[not_current_row][column_index].remove(row_possibility)
 
 
-def reverse_grid_seclude_column_possibilities(grid_row_index, grid_column_index, matrix):
+def reverse_omission_column(grid_row_index, grid_column_index, matrix):
     grid_row_start = 3 * grid_row_index
     grid_col_start = 3 * grid_column_index
     grid_row_possibilities = retrieve_grid_col_possibilities(grid_row_index, grid_column_index, matrix)
@@ -322,67 +309,66 @@ def reverse_grid_seclude_column_possibilities(grid_row_index, grid_column_index,
                                 matrix[row_index][not_current_column].remove(column_possibility)
 
 
-def reverse_all_grid_seclude_row_possibilities(matrix):
+def reverse_omission_all_rows(matrix):
     for grid_row_index in range(3):
         for grid_column_index in range(3):
-            reverse_grid_seclude_row_possibilities(grid_row_index, grid_column_index, matrix)
+            reverse_omission_row(grid_row_index, grid_column_index, matrix)
 
 
-def reverse_all_grid_seclude_column_possibilities(matrix):
+def reverse_omission_all_columns(matrix):
     for grid_row_index in range(3):
         for grid_column_index in range(3):
-            reverse_grid_seclude_column_possibilities(grid_row_index, grid_column_index, matrix)
+            reverse_omission_column(grid_row_index, grid_column_index, matrix)
 
 
-# If n cells in a row/column/grid each have n unique possibilities then they should only contain those values
-def hidden_row_subset(row):
+def hidden_subset_row(row):
     unsolved_cells = []
     for column_index, cell in enumerate(row):
         if isinstance(cell, list):
             row[column_index].sort()
             unsolved_cells += [[column_index, cell]]
     for group_size in range(2, 5):
-        for unsolved_cell in unsolved_cells:
-            for possibility_subset in itertools.combinations(unsolved_cell[1], group_size):
-                column_indices = []
-                for comparison_cell in unsolved_cells:
-                    if set(possibility_subset).issubset(set(comparison_cell[1])):
-                        column_indices += [comparison_cell[0]]
-                if len(column_indices) == group_size:
-                    counter = 0
-                    for checking_cell in unsolved_cells:
-                        disjoint = set(checking_cell[1]).isdisjoint(set(possibility_subset))
-                        if (not disjoint) and (not checking_cell[0] in column_indices):
-                            counter += 1
-                    if counter == 0:
-                        for column in column_indices:
-                            row[column] = list(possibility_subset)
+        for cell_subset in itertools.combinations(unsolved_cells, group_size):
+            collective_possibilities = []
+            column_indices = []
+            collective_anti_possibilities = []
+            for subset_cell in cell_subset:
+                collective_possibilities += subset_cell[1]
+                column_indices += [subset_cell[0]]
+            for non_subset_cell in unsolved_cells:
+                if not non_subset_cell[0] in column_indices:
+                    collective_anti_possibilities += non_subset_cell[1]
+            hidden_possibilities = set(collective_possibilities) - set(collective_anti_possibilities)
+            if len(hidden_possibilities) == group_size:
+                anti_possibilities = set(range(1, 10)) - hidden_possibilities
+                for narrowing_index in column_indices:
+                    row[narrowing_index] = list(set(row[narrowing_index]) - anti_possibilities)
 
 
-def hidden_column_subset(column, matrix):
+def hidden_subset_column(column, matrix):
     unsolved_cells = []
     for row_index, row in enumerate(matrix):
         if isinstance(row[column], list):
             unsolved_cells += [[row_index, row[column]]]
     for group_size in range(2, 5):
-        for unsolved_cell in unsolved_cells:
-            for possibility_subset in itertools.combinations(unsolved_cell[1], group_size):
-                row_indices = []
-                for comparison_cell in unsolved_cells:
-                    if set(possibility_subset).issubset(set(comparison_cell[1])):
-                        row_indices += [comparison_cell[0]]
-                if len(row_indices) == group_size:
-                    counter = 0
-                    for checking_cell in unsolved_cells:
-                        disjoint = set(checking_cell[1]).isdisjoint(set(possibility_subset))
-                        if (not disjoint) and (not checking_cell[0] in row_indices):
-                            counter += 1
-                    if counter == 0:
-                        for row in row_indices:
-                            matrix[row][column] = list(possibility_subset)
+        for cell_subset in itertools.combinations(unsolved_cells, group_size):
+            collective_possibilities = []
+            row_indices = []
+            collective_anti_possibilities = []
+            for subset_cell in cell_subset:
+                collective_possibilities += subset_cell[1]
+                row_indices += [subset_cell[0]]
+            for non_subset_cell in unsolved_cells:
+                if not non_subset_cell[0] in row_indices:
+                    collective_anti_possibilities += non_subset_cell[1]
+            hidden_possibilities = set(collective_possibilities) - set(collective_anti_possibilities)
+            if len(hidden_possibilities) == group_size:
+                anti_possibilities = set(range(1, 10)) - hidden_possibilities
+                for narrowing_index in row_indices:
+                    matrix[narrowing_index][column] = list(set(matrix[narrowing_index][column]) - anti_possibilities)
 
 
-def hidden_grid_subset(grid_row_index, grid_column_index, matrix):
+def hidden_subset_grid(grid_row_index, grid_column_index, matrix):
     unsolved_cells = []
     grid_row_start = 3 * grid_row_index
     grid_column_start = 3 * grid_column_index
@@ -391,34 +377,34 @@ def hidden_grid_subset(grid_row_index, grid_column_index, matrix):
             if isinstance(matrix[grid_row][grid_column], list):
                 unsolved_cells += [[(grid_row, grid_column), matrix[grid_row][grid_column]]]
     for group_size in range(2, 5):
-        for unsolved_cell in unsolved_cells:
-            for possibility_subset in itertools.combinations(unsolved_cell[1], group_size):
-                grid_indices = []
-                for comparison_cell in unsolved_cells:
-                    if set(possibility_subset).issubset(set(comparison_cell[1])):
-                        grid_indices += [comparison_cell[0]]
-                if len(grid_indices) == group_size:
-                    counter = 0
-                    for checking_cell in unsolved_cells:
-                        disjoint = set(checking_cell[1]).isdisjoint(set(possibility_subset))
-                        if (not disjoint) and (not checking_cell[0] in grid_indices):
-                            counter += 1
-                    if counter == 0:
-                        for grid in grid_indices:
-                            matrix[grid[0]][grid[1]] = list(possibility_subset)
+        for cell_subset in itertools.combinations(unsolved_cells, group_size):
+            collective_possibilities = []
+            grid_indices = []
+            collective_anti_possibilities = []
+            for subset_cell in cell_subset:
+                collective_possibilities += subset_cell[1]
+                grid_indices += [subset_cell[0]]
+            for non_subset_cell in unsolved_cells:
+                if not non_subset_cell[0] in grid_indices:
+                    collective_anti_possibilities += non_subset_cell[1]
+            hidden_possibilities = set(collective_possibilities) - set(collective_anti_possibilities)
+            if len(hidden_possibilities) == group_size:
+                anti_possibilities = set(range(1, 10)) - hidden_possibilities
+                for index in grid_indices:
+                    matrix[index[0]][index[1]] = list(set(matrix[index[0]][index[1]]) - anti_possibilities)
 
 
-def all_hidden_row_subset(matrix):
+def hidden_subset_all_rows(matrix):
     for row in matrix:
-        hidden_row_subset(row)
+        hidden_subset_row(row)
 
 
-def all_hidden_column_subset(column, matrix):
+def hidden_subset_all_columns(matrix):
     for column_index in range(9):
-        hidden_column_subset(column_index, matrix)
+        hidden_subset_column(column_index, matrix)
 
 
-def all_hidden_grid_subset(matrix):
+def hidden_subset_all_grids(matrix):
     for grid_row_index in range(3):
         for grid_column_index in range(3):
-            hidden_grid_subset(grid_row_index, grid_column_index, matrix)
+            hidden_subset_grid(grid_row_index, grid_column_index, matrix)
