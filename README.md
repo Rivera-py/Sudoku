@@ -2,20 +2,20 @@
 
 Pythonic Sudoku solving tool to be reworked and expanded on.
 
-- [Sudoku](#sudoku)
-  * [History](#history)
-  * [Tooling Used](#tooling-used)
-  * [Current Releases](#current-releases)
-    + [Release 0 *(Current in Development)*](#release-0---current-in-development--)
-      - [**Done**:](#--done---)
-      - [**To do**:](#--to-do---)
-  * [Future Releases](#future-releases)
-    + [Release 1](#release-1)
-      - [**To do:**](#--to-do---)
-    + [Release 2](#release-2)
-      - [**To do:**](#--to-do----1)
-    + [Release 3](#release-3)
-      - [**To do:**](#--to-do----2)
+##### Table of Contents
+* [History](#history)
+* [Tooling Used](#tooling-used)
+* [Current Releases](#current-releases)
++ [Release 0 *(Current in Development)*](#release-0---current-in-development--)
+    - [**Done**:](#--done---)
+    - [**To do**:](#--to-do---)
+* [Future Releases](#future-releases)
++ [Release 1](#release-1)
+    - [**To do:**](#--to-do---)
++ [Release 2](#release-2)
+    - [**To do:**](#--to-do----1)
++ [Release 3](#release-3)
+    - [**To do:**](#--to-do----2)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
