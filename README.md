@@ -1,5 +1,9 @@
 # Sudoku
 
+Pythonic Sudoku solving tool to be reworked and expanded on.
+
+## History
+
 Hello, this is my first repository on GitHub; a large sudoku solving algorithm.
 
 Initially I coded most of this attempting to first learn and understand pythons syntax and so the first contribution to this
