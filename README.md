@@ -49,10 +49,10 @@ Code releases currently available.
 
 Starting with **0.0.1**: Original refactored functional code.
 
-#### **Done**:
+#### **Done**
 * Start using *git-flow* to manage tags and releases.
 
-#### **To do**:
+#### **To do**
 * Start using pipenv to manage environment (with source control),
 * Transition to an modular object-oriented architecture,
 * Implement logging,
