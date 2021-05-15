@@ -15,6 +15,14 @@ Now having a better understanding of Python and source control, I'm going to try
 
 Version 0.0.1 is the end of the second iteration of this project.
 
+## Tooling Used
+
+* All development done within a Vagrant Ubuntu VM,
+* Developed in Python 3,
+* Pipenv used to develop virtual environments,
+* Using Pipenv to release as executable,
+* *git-flow* used to handle tagging and releases.
+
 ## Current Releases
 
 Code releases currently available.
