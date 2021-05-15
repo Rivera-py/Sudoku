@@ -65,7 +65,7 @@ Following are the details of all planned code releases.
 
 ### Release 1
 
-#### **To do:**
+#### **To do**
 
 * Testing various Pythonic GUI solutions,
 * Developing a user-friendly working GUI,
@@ -73,13 +73,13 @@ Following are the details of all planned code releases.
 
 ### Release 2
 
-#### **To do:**
+#### **To do**
 
 * Developing step-by-step mode,
 * Developing mode which executed with explanations.
 
 ### Release 3
 
-#### **To do:**
+#### **To do**
 
 * Creating Django / Flask frontend?
