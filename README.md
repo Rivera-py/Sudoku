@@ -2,6 +2,24 @@
 
 Pythonic Sudoku solving tool to be reworked and expanded on.
 
+- [Sudoku](#sudoku)
+  * [History](#history)
+  * [Tooling Used](#tooling-used)
+  * [Current Releases](#current-releases)
+    + [Release 0 *(Current in Development)*](#release-0---current-in-development--)
+      - [**Done**:](#--done---)
+      - [**To do**:](#--to-do---)
+  * [Future Releases](#future-releases)
+    + [Release 1](#release-1)
+      - [**To do:**](#--to-do---)
+    + [Release 2](#release-2)
+      - [**To do:**](#--to-do----1)
+    + [Release 3](#release-3)
+      - [**To do:**](#--to-do----2)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 ## History
 
 This was my first repository on GitHub; a large sudoku solving algorithm.
@@ -38,7 +56,8 @@ Starting with **0.0.1**: Original refactored functional code.
 * Start using pipenv to manage environment (with source control),
 * Transition to an modular object-oriented architecture,
 * Implement logging,
-* Load in Sudoku data from .json file.
+* Load in Sudoku data from .json file,
+* Table of Contents generated with [this](https://ecotrust-canada.github.io/markdown-toc/).
 
 ## Future Releases
 
